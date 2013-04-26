@@ -1,0 +1,20 @@
+Programbeskrivning. Beskriv detaljerat vad programmet gör.  Mitt program ska bli ett spel. Varje spelomgång består av ett antal vågor. Varje våg skapas ett antal fiender vid spelplanens start. Dessa fiender rör sig med konstant hastighet mot spelplanens utgång. Varje fiende som når utgången kommer att försvinna och minska spelarens liv med 1.
+
+För att förhindra detta kan spelaren placera ut torn. Ett torn placeras på valfri plats och kommer att skjuta regelbundet på den närmaste fienden. Det ska finnas olika typer av torn med olika egenskaper. Ett torn kostar pengar. Spelaren börjar med en begränsad mängd men får utökat kapital för varje fiende som dödas.  Användarbeskrivning. Vem kommer att använda ert program?  Vilka antaganden gör ni om användarna?  Är de vana datoranvändare, är de specialister, nybörjare, små barn, etc.  Själva spelet ska gå att använda av vem som helst som tidigare har spelat ett spel i denna genre. Jag kommer inte att lägga fokus på att göra det överdrivet nybörjarvänligt men på grund av tidsbrist kommer jag inte heller att hinna implementera en mängd komplexa funktioner.
+
+Användarscenarier. Ge minst två exempel på scenarier där en av era tänkta användare använder programmet. Beskriv i detalj vad de ser, vilken typ av input de måste ge, hur de ger sin input och hur programmets output ser ut.  Mitt program är ett spel. Därför finns det inte jättemånga tillämpningsområden utöver att just spela spelet. Ett användarscenario kan vara en person som spelar spelet genom sin webbläsare via en Java applet. Ett annat scenario kan vara någon som har laddat ner de exekverbara filerna och kör spelet lokalt. Viktigt att kontrolla att båda dessa metoderna fungerar som de ska.
+
+Det spelaren kommer att se är spelplanen. Spelplanen är en rektangulär ruta. Input ska ske huvudsakligen genom mus. En meny ska finnas där de olika tornen finns tillgängliga. Ett klick på ett sådant torn markera det och ett klick på spelplanen ska placera tornet på den positionen.  Output är grafisk. Möjligt att jag lägger till ljudeffekter och musik om jag har tid, men fokus ligger på att göra spelet roligt.
+
+Testplan. Beskriv hur ni tänker testa programmet. I den här uppgiften ska ni lägga extra vikt vid användartestning. Beskriv vilka uppgifter som testanvändaren ska utföra. De två användarscenarierna ska ingå i användartestningen.  Det hade varit smidigt att enhetstesta spelet under utvecklingens gång, men det kan bli knepigt eftersom all output är grafisk.
+
+Användartestning går ut på att spela spelet. Eftersom spelet ska fungera både lokalt och genom webbläsare så måste båda dessa testas. Användaren måste kunna förstå spelets mål snabbt och det ska inte uppstå några problem med kontrollerna. Även svårigheten på spelet måste vara rimlig, så detta måste testas. Spelaren ska inte kunna klara av spelet på första försöket, men spelaren ska inte heller förlora på första vågen.
+
+Programdesign. Beskriv de grundläggande klasserna som ni avser att implementera och ge en beskrivning av de viktigaste metoderna i varje klass.  Huvudklassen är klassen som som sköter spellogiken. För tillfället heter klassen MyGame och den ärver från klassen BasicGame ur Javabiblioteket Slick2d. De viktigaste metoderna är de som ärvs; init, render och update. Metoden init sköter initiallisering av spelet, render ritar upp allt i fönstren och update sköter spellogik.
+
+Spelet har också ett gränssnitt GameObject som innehåller metoder update och render. Alla klasser som använder detta gränssnitt måste kunna uppdatera sin spellogik och förse metoden render som ritar upp klassens grafiska representation i fönstret. Exempel på klasser som använder gränssnittet är Enemy och Tower.
+
+Tekniska frågor. En lista av tekniska frågor som ni måste hantera när ni bygger ert system. Var så detaljerad som möjligt. Ett viktigt steg mot en god design är att få ner så många frågor som möjligt på papper på ett organiserat sätt med så många förslag till lösningar som möjligt.
+
+
+Arbetsplan. Beskriv hur arbetet kommer att delas upp mellan personerna i projektet. Gör en tidsplan som visar när olika delmoment i projektet ska vara klara.

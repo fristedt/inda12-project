@@ -1,0 +1,6 @@
+CP=.:/usr/share/lwjgl/jar:/usr/share/java/slick.jar
+
+build:	MyGame.class
+
+MyGame.class: MyGame.java
+	javac -cp $(CP) MyGame.java
