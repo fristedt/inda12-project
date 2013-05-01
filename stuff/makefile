@@ -4,7 +4,7 @@ NATIVES=java.library.path=/usr/share/lwjgl/native/linux
 run: build
 	java -D$(NATIVES) -cp $(CP) MyGame
 
-build:	MyGame.class
+build:	classfiles
 
-MyGame.class: MyGame.java
-	javac -cp $(CP) MyGame.java
+classfiles:
+	javac -cp $(CP) *.java
