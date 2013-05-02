@@ -22,12 +22,26 @@ public class Tile {
     public float getWidth() {
 	return width;
     }
-
+    
     public float getHeight() {
 	return height;
     }
 
-    public void setTower(Tower t) {
+    private void setTower(Tower t) {
 	tower = t;
+    }
+
+    public void placeTower(Tower t) {
+	assert !hasTower();
+	setTower(t);
+    }
+
+    public boolean hasTower() {
+	return tower != null;
+    }
+        
+    public boolean contains(float x, float y) {
+	return x >= this.x && x <= this.x + width &&
+	    y >= this.y && y <= this.y + height;
     }
 }

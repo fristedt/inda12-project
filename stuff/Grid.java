@@ -59,16 +59,6 @@ public class Grid implements Iterable<Tile> {
 	return grid[x][y];
     }
 
-    public void placeTower(int x, int y, Tower t) {
-	assert x >= 0;
-	assert y >= 0;
-	assert x < width;
-	assert y < height;
-
-	assert grid[x][y] == null;
-	grid[x][y].setTower(t);
-    }
-    
     public int getSize() {
 	return width * height;
     }

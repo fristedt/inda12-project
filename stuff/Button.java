@@ -6,12 +6,11 @@ public class Button {
     private Color defaultColor = Color.white;
     private Color markedColor = Color.red;
     private Color currentColor = defaultColor;
-    private String text;
     private boolean marked = false;
+    private Tower tower;
 
-    public Button(float x, float y, float width, float height, String text) {
+    public Button(float x, float y, float width, float height, Tower tower) {
 	shape = new Rectangle(x, y, width, height);
-	this.text = text;
     }
 
     public Shape getShape() {
@@ -20,6 +19,10 @@ public class Button {
 
     public Color getColor() {
 	return currentColor;
+    }
+
+    public Tower getTower() {
+	return tower;
     }
 
     public void toggleMarked() {
