@@ -15,63 +15,95 @@ public class MyGame extends BasicGame {
     Tile enemySpawn;
     Tile enemyExit;
 
-    public MyGame(String title) {
-	super(title);
-    }
+     Button pickedButton;
 
-    public void init(GameContainer gc) {
-	// Create game grid.
-	int xTiles = 9;
-	int yTiles = 18;
-	gameGrid = new Grid(xTiles, yTiles, 0, 0, gameWidth / xTiles, gameHeight / yTiles);
+     public MyGame(String title) {
+	 super(title);
+     }
 
-	// Create UI grid.
-	int xUiTiles = 2;
-	int yUiTiles = 8;
-	uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
-	
-	// Create a button.
-	buttons = new ArrayList<Button>();
-	Tile tmp = uiGrid.getTile(0, 0);
-	buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), "MY BUTTON"));
+     public void init(GameContainer gc) {
+	 // Create game grid.
+	 int xTiles = 9;
+	 int yTiles = 18;
+	 gameGrid = new Grid(xTiles, yTiles, 0, 0, gameWidth / xTiles, gameHeight / yTiles);
 
-	gameObjects = new ArrayList<GameObject>();
+	 // Create UI grid.
+	 int xUiTiles = 2;
+	 int yUiTiles = 8;
+	 uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
 
-	// Set enemy spawn and exit.
-	enemySpawn = gameGrid.getTile(xTiles / 2, 0);
-	enemyExit = gameGrid.getTile(xTiles / 2, yTiles - 1);
-    }
+	 // Create a button.
+	 buttons = new ArrayList<Button>();
+	 Tile tmp = uiGrid.getTile(0, 0);
+	 buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), new Tower(tmp.getX(), tmp.getY())));
 
-    public void update(GameContainer gc, int delta) {
-	for (GameObject go : gameObjects)
-	    go.update(delta);
-    }
+	 gameObjects = new ArrayList<GameObject>();
 
-    public void render(GameContainer gc, Graphics g) {
-	// Draw grid
-	g.setColor(Color.white);
-	for (Tile tile : gameGrid) 
-	    g.drawRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
+	 // Set enemy spawn and exit.
+	 enemySpawn = gameGrid.getTile(xTiles / 2, 0);
+	 enemyExit = gameGrid.getTile(xTiles / 2, yTiles - 1);
+     }
 
-	// Color enemy spawn and exit.
-	g.setColor(Color.yellow);
-	g.fillRect(enemySpawn.getX(), enemySpawn.getY(), enemySpawn.getWidth(), enemySpawn.getHeight());
-	g.fillRect(enemyExit.getX(), enemyExit.getY(), enemyExit.getWidth(), enemyExit.getHeight());
+     public void update(GameContainer gc, int delta) {
+	 for (GameObject go : gameObjects)
+	     go.update(delta);
+     }
 
-	// Render GameObjects.
-	for (GameObject go : gameObjects)
-	    go.render(g);
+     public void render(GameContainer gc, Graphics g) {
+	 // Draw grid
+	 g.setColor(Color.white);
+	 for (Tile tile : gameGrid) 
+	     g.drawRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
 
-	// Take a guess at what this does.
-	renderUI(gc, g);
-    }
+	 // Color enemy spawn and exit.
+	 g.setColor(Color.yellow);
+	 g.fillRect(enemySpawn.getX(), enemySpawn.getY(), enemySpawn.getWidth(), enemySpawn.getHeight());
+	 g.fillRect(enemyExit.getX(), enemyExit.getY(), enemyExit.getWidth(), enemyExit.getHeight());
 
-    public void mousePressed(int button, int x, int y) {
-	// Check for eventual button clicks.
-	for (Button b : buttons) {
-	    if (b.getShape().contains((float)x, (float)y)) 
-		b.toggleMarked();
-	}
+	 // Render GameObjects.
+	 for (GameObject go : gameObjects)
+	     go.render(g);
+
+	 // Take a guess at what this does.
+	 renderUI(gc, g);
+     }
+
+     public void mousePressed(int button, int x, int y) {
+	 // Check if tower should be placed.
+	 if (pickedButton != null) {
+	     // Check if the click was in a valid tower location.
+	     for (Tile tile : gameGrid) {
+		 if (!tile.contains(x, y)) {
+		     // TODO: Give user feedback 
+		     break;
+		 }
+
+		 if (tile.hasTower()) {
+		     // TODO: -||-
+		     break;
+		 }
+
+		 placeTower(pickedButton.getTower(), tile);
+	     }
+	     pickedButton.toggleMarked();
+	     pickedButton = null;
+	     return;
+	 }
+
+	 for (Button uiButton : buttons) {
+	     if (uiButton.getShape().contains((float)x, (float)y)) { 
+		 pickedButton = uiButton;
+		 uiButton.toggleMarked();
+		 break;
+	     }
+	 }
+     }
+    
+    private void placeTower(Tower tower, Tile tile) {
+	// Add the tower here so it can be updated and rendered.
+	gameObjects.add(tower);
+	// Add the tower here so pathfinding works.
+	tile.placeTower(tower);
     }
 
     private void renderUI(GameContainer gc, Graphics g) {
