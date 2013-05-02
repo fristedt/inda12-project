@@ -82,6 +82,29 @@ public class MyGame extends BasicGame {
 	}
     }
 
+    // Tiles are nodes. Both start and end should be in g.
+    private void BFS(Tile start, Tile end, Grid g) {
+	Tile tmp;
+	Tile[] neighbour;
+	LinkedList<Tile> queue = new LinkedList<Tile>();
+	HashSet<Tile> markedTiles = new HashSet<Tile>();
+	queue.add(start);
+	markedTiles.add(start);
+	while(queue.size() > 0) {
+	    tmp = queue.poll();
+	    if (tmp.equals(end)) {
+		// I AM FINNISH!
+	    }
+	    neighbours = g.getNeighbours(tmp);
+	    for (int i = 0; i < neighbours.length; i++) {
+		if (markedTiles.contains(neighbours[i]))
+		    continue;
+		markedTiles.add(neighbours[i]);
+		queue.add(neighbours[i]);
+	    }
+	}
+    }
+
     private void spawnWave(GameContainer gc, int lvl) {
     }
     

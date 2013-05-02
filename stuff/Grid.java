@@ -50,6 +50,23 @@ public class Grid implements Iterable<Tile> {
 	return new MyIterator(grid, width, height);
     }
 
+    public Tile[] getNeighbours(Tile tile) {
+	int[] xAndY = getXY(tile);
+	int x = xAndY[0];
+	int y = xAndY[1];
+
+	if (x == 0 && y == 0) 
+	    return new Tile[]{grid[0][1], grid[1][0]};
+	else if (x == 0 && y + 1 < height) 
+	    return new Tile[]{grid[0][y - 1], grid[0][y + 1], grid[1][y]};
+	else if (y == 0 && x + 1 < width)
+	    return new Tile[]{grid[x - 1][0], grid[x + 1][0], grid[x][1]};
+	else if (x + 1 == width && y + 1 == height)
+	    return new Tile[]{grid[x][y - 1], grid[x - 1][y]};
+	else 
+	    return new Tile[]{grid[x][y - 1], grid[x][y + 1], grid[x - 1][y], grid[x + 1][y]};
+    }
+
     public Tile getTile(int x, int y) {
 	assert x >= 0;
 	assert y >= 0;
@@ -68,6 +85,16 @@ public class Grid implements Iterable<Tile> {
 	assert grid[x][y] == null;
 	grid[x][y].setTower(t);
     }
+
+    /* Returns x at index 0 and y at index 1 beacuse Java doesn't have duples and I won't make a specific data structure. */
+    public int[] getXY(Tile tile) {
+	for (int x = 0; x < width; x++) 
+	    for (int y = 0; y < height; y++)
+		if (tile.equals(grid[x][y]))
+		    return new int[]{x, y};
+	return null;
+    }
+
     
     public int getSize() {
 	return width * height;
