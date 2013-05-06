@@ -1,31 +1,40 @@
+import java.util.ArrayList;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.*;
 
 public class Enemy implements GameObject {
-    float x, y, velX, velY, width, height;
     Shape shape;
+    Color color;
+    float velocity;
+    ArrayList<Tile> path;
 
-    public Enemy(float x, float y) {
-	this.x = x;
-	this.y = y;
-	width = height = 30;
-	shape = new Rectangle(x, y, width, height);
+    float destinationX;
+    float destinationY;
+    destinationX = destinationY = -1;
+
+    public Enemy(Shape shape, Color color, float velocity, ArrayList<Tile> path) {
+	this.shape = shape;
+	this.color = color;
+	this.velocity = velocity;
+	this.path = path;
     }
 
     public void update(int delta) {
-	x += velX * delta;
-	y += velY * delta;
-
-	// This is probably bad for performance.
-	shape = new Rectangle(x, y, width, height);
+	// Chech if destination is set.
+	if (destinationX < 0 || destinationY < 0) {
+	    setNewDestination();
+	}
+	// If destination is reached, get the next one.
+	if (isDestinationReached()) {
+	    setNewDestination();
+	}
+		    
+	// Move toward destination.
+	move();
     }
 
     public void render(Graphics g) {
-	g.setColor(Color.green);
+	g.setColor(color);
 	g.fill(shape);
-    }
-
-    public Shape getShape() {
-	return shape;
     }
 }

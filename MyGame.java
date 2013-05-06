@@ -10,7 +10,8 @@ public class MyGame extends BasicGame {
 
     ArrayList<GameObject> gameObjects;
     ArrayList<Button> buttons;
-    ArrayList<Tile> shortestPath;
+    ArrayList<Tile> tilePath; // Contains the tiles that make up the shortest path.
+    ArrayList<Float> floatPath; // Contains a trail of floats that -||-.
     Grid gameGrid;
     Grid uiGrid;
     Tile enemySpawn;
@@ -45,6 +46,7 @@ public class MyGame extends BasicGame {
 	enemyExit = gameGrid.getTile(xTiles / 2, yTiles - 1);
 
 	updateShortestPath();
+	spawnWave();
     }
 
     public void update(GameContainer gc, int delta) {
@@ -53,7 +55,7 @@ public class MyGame extends BasicGame {
     }
     
     private void updateShortestPath() {
-	shortestPath = getShortestPath(enemyExit, enemySpawn, gameGrid);
+	tilePath = getShortestPath(enemyExit, enemySpawn, gameGrid);
     }
 
     public void render(GameContainer gc, Graphics g) {
@@ -62,15 +64,16 @@ public class MyGame extends BasicGame {
 	for (Tile tile : gameGrid) 
 	    g.drawRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
 
- 	g.setColor(Color.red);
-	for (Tile tile : shortestPath) {
-	    g.fillRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
-	}
-
 	// Color enemy spawn and exit.
 	g.setColor(Color.yellow);
 	g.fillRect(enemySpawn.getX(), enemySpawn.getY(), enemySpawn.getWidth(), enemySpawn.getHeight());
 	g.fillRect(enemyExit.getX(), enemyExit.getY(), enemyExit.getWidth(), enemyExit.getHeight());
+
+	// Draw shortest path for debugging purposes.
+ 	g.setColor(Color.green);
+	for (Tile tile : tilePath) {
+	    g.fillRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
+	}
 
 	// Render GameObjects.
 	for (GameObject go : gameObjects)
@@ -146,6 +149,7 @@ public class MyGame extends BasicGame {
 	    if (tmp.equals(end)) {
 		// DO THE BACKTRACK!
 		ArrayList<Tile> shortestPath = new ArrayList<Tile>();
+		shortestPath.add(end); // Gotta add the end
 		Tile t = end;
 		while (!t.equals(start)) {
 		    t = previousTile.get(t);
@@ -157,6 +161,7 @@ public class MyGame extends BasicGame {
 	    for (Tile tmp2 : neighbours) {
 		if (markedTiles.contains(tmp2))
 		    continue;
+		// Put a reference to where you came from so we can backtrack to find the shortest path.
 		previousTile.put(tmp2, tmp);
 		markedTiles.add(tmp2);
 		queue.add(tmp2);
@@ -165,10 +170,13 @@ public class MyGame extends BasicGame {
 	return null;
     }
 
-    private void spawnWave(GameContainer gc, int lvl) {
-	
+    private void spawnWave() {
+	Shape shape = new Rectangle(enemySpawn.getX(), enemySpawn.getY(), enemySpawn.getWidth() / 2, enemySpawn.getHeight() / 2);
+	Color color = Color.red;
+	float velocity = 1.0f;
+	gameObjects.add(new Enemy(shape, color, velocity, tilePath));
     }
-    
+
     public static void main(String[] args) throws SlickException {
 	AppGameContainer app = new AppGameContainer(new MyGame("My game"));
 	app.setDisplayMode(gameWidth + uiWidth, gameHeight, false);
