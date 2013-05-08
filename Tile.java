@@ -37,6 +37,12 @@ public class Tile {
     private void setTower(Tower t) {
 	tower = t;
     }
+
+    public Tower removeTower() {
+	Tower tmp = tower;
+	tower = null;
+	return tmp;
+    }
     
     public boolean hasTower() {
 	return tower != null;

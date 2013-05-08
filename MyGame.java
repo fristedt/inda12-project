@@ -67,6 +67,17 @@ public class MyGame extends BasicGame {
     }
 
     public void render(GameContainer gc, Graphics g) {
+	drawGridAndStuff(g);
+
+	// Render GameObjects.
+	for (GameObject go : gameObjects)
+	    go.render(g);
+	
+	// Take a guess at what this does.
+	renderUI(gc, g);
+    }
+
+    public void drawGridAndStuff(Graphics g) {
 	// Draw grid
 	g.setColor(Color.white);
 	for (Tile tile : gameGrid) 
@@ -82,48 +93,15 @@ public class MyGame extends BasicGame {
 	for (Tile tile : tilePath) {
 	    g.fillRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
 	}
-
-	// Render GameObjects.
-	for (GameObject go : gameObjects)
-	    go.render(g);
-	
-	// Take a guess at what this does.
-	renderUI(gc, g);
     }
 
     public void mouseReleased(int button, int x, int y) {
-	// // Check if tower should be placed.
-	// if (pickedButton != null) {
-	//     // Check if the click was in a valid tower location.
-	//     for (Tile tile : gameGrid) {
-	// 	if (!tile.contains(x, y)) {
-	// 	    // TODO: Give user feedback 
-	// 	    break;
-	// 	}
-
-	// 	if (tile.hasTower()) {
-	// 	    // TODO: -||-
-	// 	    break;
-	// 	}
-
-	// 	placeTower(pickedButton.getTower(), tile);
-	//     }
-	//     pickedButton.toggleMarked();
-	//     pickedButton = null;
-	//     return;
-	// }
-
-	// // Smart thing to do here would be to let the button supply a buttonAction method or something.
-	// for (Button uiButton : buttons) {
-	//     if (uiButton.getShape().contains((float)x, (float)y)) { 
-	// 	pickedButton = uiButton;
-	// 	uiButton.toggleMarked();
-	// 	break;
-	//     }
-	// }
 	for (Tile tile : gameGrid) {
 	    if (tile.contains(x, y)) {
 		if (tile.hasTower()) {
+		    Tower tower = tile.removeTower();
+		    gameObjects.remove(tower);
+		    updateShortestPath();
 		    return;
 		}
 		placeTower(tile);
@@ -168,7 +146,7 @@ public class MyGame extends BasicGame {
 	    if (tmp.equals(end)) {
 		// DO THE BACKTRACK!
 		ArrayList<Tile> shortestPath = new ArrayList<Tile>();
-		shortestPath.add(end); // Gotta add the end
+		shortestPath.add(end); // Gotta add the end.
 		Tile t = end;
 		while (!t.equals(start)) {
 		    t = previousTile.get(t);
