@@ -17,6 +17,13 @@ public class MyGame extends BasicGame {
     Tile enemySpawn;
     Tile enemyExit;
 
+    int xTiles = 9;
+    int yTiles = 18;
+    int xUiTiles = 2;
+    int yUiTiles = 8;
+
+    long counter; // Used to spawn enemies.
+
     Button pickedButton;
 
     public MyGame(String title) {
@@ -25,19 +32,15 @@ public class MyGame extends BasicGame {
 
     public void init(GameContainer gc) {
 	// Create game grid.
-	int xTiles = 9;
-	int yTiles = 18;
 	gameGrid = new Grid(xTiles, yTiles, 0, 0, gameWidth / xTiles, gameHeight / yTiles);
 
 	// Create UI grid.
-	int xUiTiles = 2;
-	int yUiTiles = 8;
 	uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
 
 	// Create a button.
 	buttons = new ArrayList<Button>();
 	Tile tmp = uiGrid.getTile(0, 0);
-	buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), new Tower(tmp.getX(), tmp.getY())));
+	buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), null));
 
 	gameObjects = new ArrayList<GameObject>();
 
@@ -46,10 +49,15 @@ public class MyGame extends BasicGame {
 	enemyExit = gameGrid.getTile(xTiles / 2, yTiles - 1);
 
 	updateShortestPath();
-	spawnWave();
     }
 
     public void update(GameContainer gc, int delta) {
+	counter += delta;
+	if (counter >= 500) {
+	    counter = 0;
+	    spawnEnemy();
+	}
+
 	for (GameObject go : gameObjects)
 	    go.update(delta);
     }
@@ -84,39 +92,50 @@ public class MyGame extends BasicGame {
     }
 
     public void mouseReleased(int button, int x, int y) {
-	// Check if tower should be placed.
-	if (pickedButton != null) {
-	    // Check if the click was in a valid tower location.
-	    for (Tile tile : gameGrid) {
-		if (!tile.contains(x, y)) {
-		    // TODO: Give user feedback 
-		    break;
-		}
+	// // Check if tower should be placed.
+	// if (pickedButton != null) {
+	//     // Check if the click was in a valid tower location.
+	//     for (Tile tile : gameGrid) {
+	// 	if (!tile.contains(x, y)) {
+	// 	    // TODO: Give user feedback 
+	// 	    break;
+	// 	}
 
+	// 	if (tile.hasTower()) {
+	// 	    // TODO: -||-
+	// 	    break;
+	// 	}
+
+	// 	placeTower(pickedButton.getTower(), tile);
+	//     }
+	//     pickedButton.toggleMarked();
+	//     pickedButton = null;
+	//     return;
+	// }
+
+	// // Smart thing to do here would be to let the button supply a buttonAction method or something.
+	// for (Button uiButton : buttons) {
+	//     if (uiButton.getShape().contains((float)x, (float)y)) { 
+	// 	pickedButton = uiButton;
+	// 	uiButton.toggleMarked();
+	// 	break;
+	//     }
+	// }
+	for (Tile tile : gameGrid) {
+	    if (tile.contains(x, y)) {
 		if (tile.hasTower()) {
-		    // TODO: -||-
-		    break;
+		    return;
 		}
-
-		placeTower(pickedButton.getTower(), tile);
-	    }
-	    pickedButton.toggleMarked();
-	    pickedButton = null;
-	    return;
-	}
-
-	// Smart thing to do here would be to let the button supply a buttonAction method or something.
-	for (Button uiButton : buttons) {
-	    if (uiButton.getShape().contains((float)x, (float)y)) { 
-		pickedButton = uiButton;
-		uiButton.toggleMarked();
-		break;
+		placeTower(tile);
 	    }
 	}
     }
     
 
-    private void placeTower(Tower tower, Tile tile) {
+    private void placeTower(Tile tile) {
+	Shape shapeTmp = new Circle(tile.getCenterX(), tile.getCenterY(), tile.getWidth() / 3);
+	Tower tower = new Tower(shapeTmp, Color.blue);
+
 	// Add the tower here so it can be updated and rendered.
 	gameObjects.add(tower);
 	// Add the tower here so pathfinding works.
@@ -170,10 +189,10 @@ public class MyGame extends BasicGame {
 	return null;
     }
 
-    private void spawnWave() {
-	Shape shape = new Rectangle(enemySpawn.getX(), enemySpawn.getY(), enemySpawn.getWidth() / 2, enemySpawn.getHeight() / 2);
+    private void spawnEnemy() {
+	Shape shape = new Rectangle(enemySpawn.getX() + enemySpawn.getWidth() / 4, enemySpawn.getY(), enemySpawn.getWidth()/ 2, enemySpawn.getHeight() / 2);
 	Color color = Color.red;
-	float velocity = 1.0f;
+	float velocity = 0.1f;
 	gameObjects.add(new Enemy(shape, color, velocity, tilePath));
     }
 

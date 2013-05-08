@@ -26,12 +26,20 @@ public class Tile {
 	return height;
     }
 
+    public float getCenterX() {
+	return x + width / 2;
+    }
+
+    public float getCenterY() {
+	return y + height / 2;
+    }
+
     private void setTower(Tower t) {
 	tower = t;
     }
     
     public boolean hasTower() {
-	return tower == null;
+	return tower != null;
     }
 
     public void placeTower(Tower t) {

@@ -67,18 +67,13 @@ public class Grid implements Iterable<Tile> {
 	if (y + 1 < height)
 	    neighbours.add(grid[x][y + 1]);
 
-	// System.out.println("Before: " + neighbours.size());
 	Iterator<Tile> iterator = neighbours.iterator();
 	while (iterator.hasNext()) {
-	    // System.out.println("inside loop");
 	    Tile tmp = iterator.next();
-	    System.out.println("x = " + tmp.getX() + " y = " + tmp.getY());
 	    if (!tmp.isTraverseable()) {
-		// System.out.println("removed");
 		iterator.remove();
 	    }
 	}
-	// System.out.println("After: " + neighbours.size()); 
 	return neighbours;
     }
 

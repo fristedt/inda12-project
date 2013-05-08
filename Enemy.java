@@ -5,32 +5,43 @@ import org.newdawn.slick.geom.*;
 public class Enemy implements GameObject {
     Shape shape;
     Color color;
-    float velocity;
+    float maxVelocity; // The length of the movement vector.
     ArrayList<Tile> path;
+    Tile currentTile;
+    int currentIndex;
 
-    float destinationX;
-    float destinationY;
-    destinationX = destinationY = -1;
-
-    public Enemy(Shape shape, Color color, float velocity, ArrayList<Tile> path) {
+    public Enemy(Shape shape, Color color, float maxVelocity, ArrayList<Tile> path) {
 	this.shape = shape;
 	this.color = color;
-	this.velocity = velocity;
+	this.maxVelocity = maxVelocity;
 	this.path = path;
+	currentIndex = 0;
+	currentTile = path.get(0);
     }
 
     public void update(int delta) {
-	// Chech if destination is set.
-	if (destinationX < 0 || destinationY < 0) {
-	    setNewDestination();
+	move(delta);
+    }
+
+    private void move(int delta) {
+	Vector2f position = new Vector2f(shape.getCenterX(), shape.getCenterY());
+	
+	if (currentTile.contains(position.getX(), position.getY())) {
+	    if (currentTile == path.get(path.size() - 1)) 
+		return; // Should decrease lives here.
+	    currentIndex++;
+	    currentTile = path.get(currentIndex);
 	}
-	// If destination is reached, get the next one.
-	if (isDestinationReached()) {
-	    setNewDestination();
-	}
-		    
-	// Move toward destination.
-	move();
+
+	Vector2f target = new Vector2f(currentTile.getCenterX(), currentTile.getCenterY());
+
+	Vector2f velocityVector = new Vector2f(target.getX() - position.getX(), target.getY() - position.getY());
+	velocityVector = velocityVector.getNormal();
+	velocityVector = velocityVector.scale(maxVelocity).scale(delta);
+
+	position = position.add(velocityVector);
+	shape.setCenterX(position.getX());
+	shape.setCenterY(position.getY());
     }
 
     public void render(Graphics g) {
