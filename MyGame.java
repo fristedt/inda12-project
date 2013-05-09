@@ -63,24 +63,33 @@ public class MyGame extends BasicGame {
 	    spawnEnemy();
 	}
 
-	// Should optimize this.
+	// Makes the tower always fire at the closest enemy. Might be could if I want different Tower AI.
+	// for (Tower tower : towers) {
+	//     float smallestDistance = Float.MAX_VALUE;
+	//     Enemy closestEnemy = null;
+	//     for (Enemy enemy : enemies) {
+	// 	Vector2f enemyCenter = new Vector2f(enemy.getShape().getCenterX(), enemy.getShape().getCenterY());
+	// 	Vector2f towerCenter = new Vector2f(tower.getShape().getCenterX(), tower.getShape().getCenterY());
+	// 	Vector2f vector = new Vector2f(towerCenter.getX() - enemyCenter.getX(), towerCenter.getY() - enemyCenter.getY());
+	// 	float vectorLength = (float)Math.sqrt(Math.pow(vector.getX(), 2) + Math.pow(vector.getY(), 2));
+	// 	if (vectorLength < smallestDistance) {
+	// 	    smallestDistance = vectorLength;
+	// 	    closestEnemy = enemy;
+	// 	}
+	//     }
+	//     if (smallestDistance < tower.getRange())
+	// 	tower.fire(closestEnemy, delta);
+	// }
+
+	// Makes the tower fire at the enemy closest to the exit.
 	for (Tower tower : towers) {
-	    float smallestDistance = Float.MAX_VALUE;
-	    Enemy closestEnemy = null;
+	    if (tower.hasTarget())
+		continue;
 	    for (Enemy enemy : enemies) {
-		Vector2f enemyCenter = new Vector2f(enemy.getShape().getCenterX(), enemy.getShape().getCenterY());
-		Vector2f towerCenter = new Vector2f(tower.getShape().getCenterX(), tower.getShape().getCenterY());
-		Vector2f vector = new Vector2f(towerCenter.getX() - enemyCenter.getX(), towerCenter.getY() - enemyCenter.getY());
-		float vectorLength = (float)Math.sqrt(Math.pow(vector.getX(), 2) + Math.pow(vector.getY(), 2));
-		if (vectorLength < smallestDistance) {
-		    smallestDistance = vectorLength;
-		    closestEnemy = enemy;
-		}
+		if (tower.targetInRange(enemy))
+		    tower.setTarget(enemy);
 	    }
-	    if (smallestDistance < tower.getRange())
-		tower.fire(closestEnemy, delta);
 	}
-		    
 
 	for (GameObject go : gameObjects) {
 	    if (go instanceof Enemy) {
@@ -93,8 +102,9 @@ public class MyGame extends BasicGame {
 	removeTaggedEnemies();
     }
     
-    private void updateShortestPath() {
+    private ArrayList<Tile> updateShortestPath() {
 	tilePath = getShortestPath(enemyExit, enemySpawn, gameGrid);
+	return tilePath;
     }
 
     public void render(GameContainer gc, Graphics g) {
@@ -130,16 +140,25 @@ public class MyGame extends BasicGame {
 	for (Tile tile : gameGrid) {
 	    if (tile.contains(x, y)) {
 		if (tile.hasTower()) {
-		    Tower tower = tile.removeTower();
-		    gameObjects.remove(tower);
-		    updateShortestPath();
+		    removeTower(tile);
 		    return;
 		}
 		placeTower(tile);
+		// Remove tower instantly if it blocks the path.
+		if (updateShortestPath() == null) {
+		    removeTower(tile);
+		}
 		return;
 	    }
 	}
     }
+
+    public void removeTower(Tile tile) {
+	Tower tower = tile.removeTower();
+	gameObjects.remove(tower);
+	updateShortestPath();
+    }
+	    
 
     private void placeTower(Tile tile) {
 	Shape shapeTmp = new Circle(tile.getCenterX(), tile.getCenterY(), tile.getWidth() / 3);
@@ -206,7 +225,7 @@ public class MyGame extends BasicGame {
 	float velocity = 0.1f;
 	Enemy enemy = new Enemy(shape, color, velocity, tilePath);
 	gameObjects.add(enemy);
-	enemies.add(enemy);
+	enemies.add(0, enemy);
     }
     
     private void tagEnemyForRemoval(Enemy enemy) {
