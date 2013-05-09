@@ -9,6 +9,7 @@ public class Enemy implements GameObject {
     ArrayList<Tile> path;
     Tile currentTile;
     int currentIndex;
+    int hp;
 
     public Enemy(Shape shape, Color color, float maxVelocity, ArrayList<Tile> path) {
 	this.shape = shape;
@@ -17,12 +18,17 @@ public class Enemy implements GameObject {
 	this.path = path;
 	currentIndex = 0;
 	currentTile = path.get(0);
+	hp = 100;
     }
 
     public void update(int delta) {
 	move(delta);
     }
 
+    public Shape getShape() {
+	return shape;
+    }
+    
     private void move(int delta) {
 	Vector2f position = new Vector2f(shape.getCenterX(), shape.getCenterY());
 	
@@ -42,6 +48,14 @@ public class Enemy implements GameObject {
 	position = position.add(velocityVector);
 	shape.setCenterX(position.getX());
 	shape.setCenterY(position.getY());
+    }
+
+    public void setHp(int hp) {
+	this.hp = hp;
+    }
+
+    public int getHp() {
+	return hp;
     }
 
     public void render(Graphics g) {

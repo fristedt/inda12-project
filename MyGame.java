@@ -11,7 +11,9 @@ public class MyGame extends BasicGame {
     ArrayList<GameObject> gameObjects;
     ArrayList<Button> buttons;
     ArrayList<Tile> tilePath; // Contains the tiles that make up the shortest path.
-    ArrayList<Float> floatPath; // Contains a trail of floats that -||-.
+    ArrayList<Tower> towers; 
+    ArrayList<Enemy> enemies;
+    ArrayList<Enemy> taggedEnemies;
     Grid gameGrid;
     Grid uiGrid;
     Tile enemySpawn;
@@ -43,6 +45,9 @@ public class MyGame extends BasicGame {
 	buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), null));
 
 	gameObjects = new ArrayList<GameObject>();
+	towers = new ArrayList<Tower>();
+	enemies = new ArrayList<Enemy>();
+	taggedEnemies = new ArrayList<Enemy>();
 
 	// Set enemy spawn and exit.
 	enemySpawn = gameGrid.getTile(xTiles / 2, 0);
@@ -58,8 +63,34 @@ public class MyGame extends BasicGame {
 	    spawnEnemy();
 	}
 
-	for (GameObject go : gameObjects)
+	// Should optimize this.
+	for (Tower tower : towers) {
+	    float smallestDistance = Float.MAX_VALUE;
+	    Enemy closestEnemy = null;
+	    for (Enemy enemy : enemies) {
+		Vector2f enemyCenter = new Vector2f(enemy.getShape().getCenterX(), enemy.getShape().getCenterY());
+		Vector2f towerCenter = new Vector2f(tower.getShape().getCenterX(), tower.getShape().getCenterY());
+		Vector2f vector = new Vector2f(towerCenter.getX() - enemyCenter.getX(), towerCenter.getY() - enemyCenter.getY());
+		float vectorLength = (float)Math.sqrt(Math.pow(vector.getX(), 2) + Math.pow(vector.getY(), 2));
+		if (vectorLength < smallestDistance) {
+		    smallestDistance = vectorLength;
+		    closestEnemy = enemy;
+		}
+	    }
+	    if (smallestDistance < tower.getRange())
+		tower.fire(closestEnemy, delta);
+	}
+		    
+
+	for (GameObject go : gameObjects) {
+	    if (go instanceof Enemy) {
+		Enemy enemy = (Enemy)go;
+		if (enemy.getHp() < 0)
+		    tagEnemyForRemoval(enemy); // Gotta do this because of concurrent modification shit.
+	    }
 	    go.update(delta);
+	}
+	removeTaggedEnemies();
     }
     
     private void updateShortestPath() {
@@ -105,10 +136,10 @@ public class MyGame extends BasicGame {
 		    return;
 		}
 		placeTower(tile);
+		return;
 	    }
 	}
     }
-    
 
     private void placeTower(Tile tile) {
 	Shape shapeTmp = new Circle(tile.getCenterX(), tile.getCenterY(), tile.getWidth() / 3);
@@ -116,6 +147,8 @@ public class MyGame extends BasicGame {
 
 	// Add the tower here so it can be updated and rendered.
 	gameObjects.add(tower);
+	// Add the tower so it can fire.
+	towers.add(tower);
 	// Add the tower here so pathfinding works.
 	tile.placeTower(tower);
 	updateShortestPath();
@@ -171,7 +204,21 @@ public class MyGame extends BasicGame {
 	Shape shape = new Rectangle(enemySpawn.getX() + enemySpawn.getWidth() / 4, enemySpawn.getY(), enemySpawn.getWidth()/ 2, enemySpawn.getHeight() / 2);
 	Color color = Color.red;
 	float velocity = 0.1f;
-	gameObjects.add(new Enemy(shape, color, velocity, tilePath));
+	Enemy enemy = new Enemy(shape, color, velocity, tilePath);
+	gameObjects.add(enemy);
+	enemies.add(enemy);
+    }
+    
+    private void tagEnemyForRemoval(Enemy enemy) {
+	taggedEnemies.add(enemy);
+    }
+    
+    private void removeTaggedEnemies() {
+	for (Enemy enemy : taggedEnemies) {
+	    gameObjects.remove(enemy);
+	    enemies.remove(enemy);
+	}
+	taggedEnemies = new ArrayList<Enemy>();
     }
 
     public static void main(String[] args) throws SlickException {
