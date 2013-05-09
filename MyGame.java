@@ -130,7 +130,7 @@ public class MyGame extends BasicGame {
 	g.fillRect(enemyExit.getX(), enemyExit.getY(), enemyExit.getWidth(), enemyExit.getHeight());
 
 	// Draw shortest path for debugging purposes.
- 	g.setColor(Color.green);
+ 	g.setColor(Color.white);
 	for (Tile tile : tilePath) {
 	    g.fillRect(tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight());
 	}

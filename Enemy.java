@@ -10,6 +10,7 @@ public class Enemy implements GameObject {
     Tile currentTile;
     int currentIndex;
     int hp;
+    int maxHp;
 
     public Enemy(Shape shape, Color color, float maxVelocity, ArrayList<Tile> path) {
 	this.shape = shape;
@@ -18,7 +19,7 @@ public class Enemy implements GameObject {
 	this.path = path;
 	currentIndex = 0;
 	currentTile = path.get(0);
-	hp = 100;
+	maxHp = hp = 100;
     }
 
     public void update(int delta) {
@@ -61,5 +62,15 @@ public class Enemy implements GameObject {
     public void render(Graphics g) {
 	g.setColor(color);
 	g.fill(shape);
+	renderHpBar(g);
+    }
+
+    private void renderHpBar(Graphics g) {
+	float barHeight = shape.getHeight() / 5;
+	g.setColor(Color.red);
+	g.fillRect(shape.getX(), shape.getY() - 5.0f, shape.getWidth(), barHeight);
+	g.setColor(Color.green);
+	float health = (float)hp / (float)maxHp * shape.getWidth();
+	g.fillRect(shape.getX(), shape.getY() - 5.0f,  health, barHeight);
     }
 }
