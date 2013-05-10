@@ -255,7 +255,7 @@ public class MyGame extends BasicGame {
 	Shape shape = new Rectangle(enemySpawn.getX() + enemySpawn.getWidth() / 4, enemySpawn.getY(), enemySpawn.getWidth()/ 2, enemySpawn.getHeight() / 2);
 	Color color = Color.red;
 	float velocity = 0.1f;
-	Enemy enemy = new Enemy(shape, color, velocity, tilePath);
+	Enemy enemy = new Enemy(shape, color, velocity, shortestPaths, enemySpawn);
 	gameObjects.add(enemy);
 	enemies.add(0, enemy);
     }
@@ -265,6 +265,7 @@ public class MyGame extends BasicGame {
     }
     
     private void removeTaggedEnemies() {
+	// TODO: Enemies that reach the exit should not warrant a reward.
 	for (Enemy enemy : taggedEnemies) {
 	    gameObjects.remove(enemy);
 	    enemies.remove(enemy);

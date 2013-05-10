@@ -7,25 +7,75 @@ public class Enemy implements GameObject {
     Color color;
     float maxVelocity; // The length of the movement vector.
     ArrayList<Tile> path;
+    ArrayList<ArrayList<Tile>> paths;
     Tile currentTile;
     int currentIndex;
     int hp;
     int maxHp;
     int reward;
 
-    public Enemy(Shape shape, Color color, float maxVelocity, ArrayList<Tile> path) {
+    public Enemy(Shape shape, Color color, float maxVelocity, ArrayList<ArrayList<Tile>> paths, Tile firstTile) {
 	this.shape = shape;
 	this.color = color;
 	this.maxVelocity = maxVelocity;
-	this.path = path;
-	currentIndex = 0;
-	currentTile = path.get(0);
+	this.paths = paths;
+	currentTile = firstTile;
+
+	setPath();
+
 	maxHp = hp = 100;
 	reward = 1;
     }
 
+    private void setPath() {
+	int shortestPathLength = Integer.MAX_VALUE;
+
+	// Dear compiler,
+	// Fuck yourself.
+	ArrayList<Tile> shortestPath = null; 
+
+	for (ArrayList<Tile> path : paths) {
+	    // Not all paths are valid.
+	    if (path == null)
+		continue;
+	    int i = 0;
+	    for (Tile tile : path) {
+		i++;
+		if (tile != currentTile) 
+		    continue;
+		if (path.size() - i >= shortestPathLength) 
+		    continue;
+
+		shortestPath = path;
+		shortestPathLength = path.size() - i;
+	    }
+	}
+	path = shortestPath;
+    }	
+
     public void update(int delta) {
-	move(delta);
+	setCurrentTile();
+
+	setPath();
+
+x	move(delta);
+    }
+
+    private void setCurrentTile() {
+	float shortestDistance = Float.MAX_VALUE;
+	Tile closestTile = null;
+	for (Tile tile : path) {
+	    double distance = Math.sqrt(Math.pow(shape.getCenterX() - tile.getCenterX(), 2) + Math.pow(shape.getCenterY() - tile.getCenterY(), 2)); 
+	    if (shortestDistance < distance)
+		continue;
+	    if (tile.hasTower())
+		continue;
+
+	    shortestDistance = (float)distance;
+	    closestTile = tile;
+	}
+	currentTile = closestTile;
+	currentIndex = path.indexOf(currentTile);
     }
 
     public Shape getShape() {
@@ -36,10 +86,10 @@ public class Enemy implements GameObject {
 	Vector2f position = new Vector2f(shape.getCenterX(), shape.getCenterY());
 	
 	if (currentTile.contains(position.getX(), position.getY())) {
-	    if (currentTile == path.get(path.size() - 1)) 
-		return; // Should decrease lives here.
 	    currentIndex++;
-	    currentTile = path.get(currentIndex);
+	    if (currentIndex >= path.size())
+		return;
+	    currentTile = path.get(currentIndex);	    
 	}
 
 	Vector2f target = new Vector2f(currentTile.getCenterX(), currentTile.getCenterY());
@@ -65,6 +115,7 @@ public class Enemy implements GameObject {
 	g.setColor(color);
 	g.fill(shape);
 	renderHpBar(g);
+	g.drawString("" + currentTile, shape. getX(), shape.getY() - 20);
     }
 
     private void renderHpBar(Graphics g) {
