@@ -58,7 +58,7 @@ public class Enemy implements GameObject {
 
 	setPath();
 
-x	move(delta);
+	move(delta);
     }
 
     private void setCurrentTile() {
