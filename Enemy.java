@@ -11,6 +11,7 @@ public class Enemy implements GameObject {
     int currentIndex;
     int hp;
     int maxHp;
+    int reward;
 
     public Enemy(Shape shape, Color color, float maxVelocity, ArrayList<Tile> path) {
 	this.shape = shape;
@@ -20,6 +21,7 @@ public class Enemy implements GameObject {
 	currentIndex = 0;
 	currentTile = path.get(0);
 	maxHp = hp = 100;
+	reward = 1;
     }
 
     public void update(int delta) {
@@ -72,5 +74,9 @@ public class Enemy implements GameObject {
 	g.setColor(Color.green);
 	float health = (float)hp / (float)maxHp * shape.getWidth();
 	g.fillRect(shape.getX(), shape.getY() - 5.0f,  health, barHeight);
+    }
+
+    public int getReward() {
+	return reward;
     }
 }

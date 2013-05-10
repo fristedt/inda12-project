@@ -2,15 +2,17 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.geom.*;
 import java.util.*;
 
+/* ONCE CLASS TO RULE THEM ALL; THE GOD CLASS! */
 public class MyGame extends BasicGame {
     // gameWidth / gameHeight must equal xTiles / yTiles in the init method below.
     static final int gameWidth = 320;
-    static final int uiWidth = 0;//gameWidth / 2;
+    static final int uiWidth = gameWidth / 2;
     static final int gameHeight = 640;
 
     ArrayList<GameObject> gameObjects;
     ArrayList<Button> buttons;
     ArrayList<Tile> tilePath; // Contains the tiles that make up the shortest path.
+    ArrayList<ArrayList<Tile>> shortestPaths;
     ArrayList<Tower> towers; 
     ArrayList<Enemy> enemies;
     ArrayList<Enemy> taggedEnemies;
@@ -23,6 +25,10 @@ public class MyGame extends BasicGame {
     int yTiles = 18;
     int xUiTiles = 2;
     int yUiTiles = 8;
+
+    int lives = 25;
+    int money = 25;
+    float resellFactor = 0.75f;
 
     long counter; // Used to spawn enemies.
 
@@ -37,7 +43,7 @@ public class MyGame extends BasicGame {
 	gameGrid = new Grid(xTiles, yTiles, 0, 0, gameWidth / xTiles, gameHeight / yTiles);
 
 	// Create UI grid.
-	// uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
+	uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
 
 	// // Create a button.
 	// buttons = new ArrayList<Button>();
@@ -57,13 +63,18 @@ public class MyGame extends BasicGame {
     }
 
     public void update(GameContainer gc, int delta) {
+	if (lives <= 0) {
+	    // TODO: Give better feedback.
+	    System.exit(0);
+	}
+
 	counter += delta;
 	if (counter >= 500) {
 	    counter = 0;
 	    spawnEnemy();
 	}
 
-	// Makes the tower always fire at the closest enemy. Might be could if I want different Tower AI.
+	// Makes the tower always fire at the closest enemy. Might be useful if I want different Tower AI.
 	// for (Tower tower : towers) {
 	//     float smallestDistance = Float.MAX_VALUE;
 	//     Enemy closestEnemy = null;
@@ -94,7 +105,11 @@ public class MyGame extends BasicGame {
 	for (GameObject go : gameObjects) {
 	    if (go instanceof Enemy) {
 		Enemy enemy = (Enemy)go;
-		if (enemy.getHp() < 0)
+		if (enemyExit.contains(enemy.getShape().getCenterX(), enemy.getShape().getCenterY())) {
+		    lives--;
+		    tagEnemyForRemoval(enemy); // Gotta do this because of concurrent modification shit.
+		}
+		if (enemy.getHp() <= 0)
 		    tagEnemyForRemoval(enemy); // Gotta do this because of concurrent modification shit.
 	    }
 	    go.update(delta);
@@ -104,6 +119,9 @@ public class MyGame extends BasicGame {
     
     private ArrayList<Tile> updateShortestPath() {
 	tilePath = getShortestPath(enemyExit, enemySpawn, gameGrid);
+	shortestPaths = new ArrayList<ArrayList<Tile>>();
+	for (Tile tile : gameGrid)
+	    shortestPaths.add(getShortestPath(enemyExit, tile, gameGrid));
 	return tilePath;
     }
 
@@ -115,7 +133,7 @@ public class MyGame extends BasicGame {
 	    go.render(g);
 	
 	// Take a guess at what this does.
-	// renderUI(gc, g);
+	renderUI(gc, g);
     }
 
     public void drawGridAndStuff(Graphics g) {
@@ -145,7 +163,7 @@ public class MyGame extends BasicGame {
 		}
 		placeTower(tile);
 		// Remove tower instantly if it blocks the path.
-		if (updateShortestPath() == null) {
+		if (updateShortestPath() == null || tile == enemyExit || tile == enemySpawn) {
 		    removeTower(tile);
 		}
 		return;
@@ -156,29 +174,43 @@ public class MyGame extends BasicGame {
     public void removeTower(Tile tile) {
 	Tower tower = tile.removeTower();
 	gameObjects.remove(tower);
+	money += tower.getCost() * resellFactor;
 	updateShortestPath();
     }
 	    
 
     private void placeTower(Tile tile) {
 	Shape shapeTmp = new Circle(tile.getCenterX(), tile.getCenterY(), tile.getWidth() / 3);
-	Tower tower = new Tower(shapeTmp, Color.blue);
+	Tower tower = new BeamTower(shapeTmp, Color.blue);
 
+	if (tower.getCost() > money) 
+	    return; // TODO: Give user feedback.
+
+	money -= tower.getCost();
+	
 	// Add the tower here so it can be updated and rendered.
 	gameObjects.add(tower);
+
 	// Add the tower so it can fire.
 	towers.add(tower);
+
 	// Add the tower here so pathfinding works.
 	tile.placeTower(tower);
+
 	updateShortestPath();
     }
 
     private void renderUI(GameContainer gc, Graphics g) {
-	// Render TowerMenu
-	for (Button button : buttons) {
-	    g.setColor(button.getColor());
-	    g.draw(button.getShape());
-	}
+	// // Render TowerMenu
+	// for (Button button : buttons) {
+	//     g.setColor(button.getColor());
+	//     g.draw(button.getShape());
+	// }
+	g.setColor(Color.white);
+	Tile livesTile = uiGrid.getTile(0, 0);
+	g.drawString("Lives: " + lives + "\n" +
+		     "Money: " + money, 
+		     livesTile.getX(), livesTile.getY());
     }
 
     // Returns the shortest path (in reverse order) between start and end in grid g. Returns null if no path exists.
@@ -236,6 +268,7 @@ public class MyGame extends BasicGame {
 	for (Enemy enemy : taggedEnemies) {
 	    gameObjects.remove(enemy);
 	    enemies.remove(enemy);
+	    money += enemy.getReward();
 	}
 	taggedEnemies = new ArrayList<Enemy>();
     }
