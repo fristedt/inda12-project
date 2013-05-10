@@ -17,9 +17,9 @@ public class Tower implements GameObject {
     public Tower(Shape shape, Color color) {
 	this.shape = shape;
 	this.color = color;
-	range = 150.0f;
-	damage = 34;
-	counter = rateOfFire = 1500;
+	range = 75.0f;
+	damage = 5;
+	counter = rateOfFire = 50;
 	laserDuration = 500;
     }
 
@@ -27,7 +27,7 @@ public class Tower implements GameObject {
 	if (target == null)
 	    return;
 
-	if (target.getHp() <= 0) {
+	if (target.getHp() < 0) {
 	    target = null;
 	    return;
 	}

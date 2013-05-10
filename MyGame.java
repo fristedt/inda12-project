@@ -5,7 +5,7 @@ import java.util.*;
 public class MyGame extends BasicGame {
     // gameWidth / gameHeight must equal xTiles / yTiles in the init method below.
     static final int gameWidth = 320;
-    static final int uiWidth = gameWidth / 2;
+    static final int uiWidth = 0;//gameWidth / 2;
     static final int gameHeight = 640;
 
     ArrayList<GameObject> gameObjects;
@@ -37,12 +37,12 @@ public class MyGame extends BasicGame {
 	gameGrid = new Grid(xTiles, yTiles, 0, 0, gameWidth / xTiles, gameHeight / yTiles);
 
 	// Create UI grid.
-	uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
+	// uiGrid = new Grid(xUiTiles, yUiTiles, gameWidth, 0, uiWidth / xUiTiles, gc.getHeight() / yUiTiles);
 
-	// Create a button.
-	buttons = new ArrayList<Button>();
-	Tile tmp = uiGrid.getTile(0, 0);
-	buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), null));
+	// // Create a button.
+	// buttons = new ArrayList<Button>();
+	// Tile tmp = uiGrid.getTile(0, 0);
+	// buttons.add(new Button(tmp.getX(), tmp.getY(), tmp.getWidth(), tmp.getHeight(), null));
 
 	gameObjects = new ArrayList<GameObject>();
 	towers = new ArrayList<Tower>();
@@ -115,7 +115,7 @@ public class MyGame extends BasicGame {
 	    go.render(g);
 	
 	// Take a guess at what this does.
-	renderUI(gc, g);
+	// renderUI(gc, g);
     }
 
     public void drawGridAndStuff(Graphics g) {
