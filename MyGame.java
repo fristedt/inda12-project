@@ -15,7 +15,8 @@ public class MyGame extends BasicGame {
     ArrayList<ArrayList<Tile>> shortestPaths;
     ArrayList<Tower> towers; 
     ArrayList<Enemy> enemies;
-    ArrayList<Enemy> taggedEnemies;
+    ArrayList<Enemy> taggedKilledEnemies;
+    ArrayList<Enemy> taggedEscapedEnemies;
     Grid gameGrid;
     Grid uiGrid;
     Tile enemySpawn;
@@ -29,6 +30,8 @@ public class MyGame extends BasicGame {
     int lives = 25;
     int money = 25;
     float resellFactor = 0.75f;
+
+    int enemyHp = 50;
 
     long counter; // Used to spawn enemies.
 
@@ -53,7 +56,8 @@ public class MyGame extends BasicGame {
 	gameObjects = new ArrayList<GameObject>();
 	towers = new ArrayList<Tower>();
 	enemies = new ArrayList<Enemy>();
-	taggedEnemies = new ArrayList<Enemy>();
+	taggedKilledEnemies = new ArrayList<Enemy>();
+	taggedEscapedEnemies = new ArrayList<Enemy>();
 
 	// Set enemy spawn and exit.
 	enemySpawn = gameGrid.getTile(xTiles / 2, 0);
@@ -68,29 +72,12 @@ public class MyGame extends BasicGame {
 	    System.exit(0);
 	}
 
+	// Spawn enemy every half second.
 	counter += delta;
 	if (counter >= 500) {
 	    counter = 0;
 	    spawnEnemy();
 	}
-
-	// Makes the tower always fire at the closest enemy. Might be useful if I want different Tower AI.
-	// for (Tower tower : towers) {
-	//     float smallestDistance = Float.MAX_VALUE;
-	//     Enemy closestEnemy = null;
-	//     for (Enemy enemy : enemies) {
-	// 	Vector2f enemyCenter = new Vector2f(enemy.getShape().getCenterX(), enemy.getShape().getCenterY());
-	// 	Vector2f towerCenter = new Vector2f(tower.getShape().getCenterX(), tower.getShape().getCenterY());
-	// 	Vector2f vector = new Vector2f(towerCenter.getX() - enemyCenter.getX(), towerCenter.getY() - enemyCenter.getY());
-	// 	float vectorLength = (float)Math.sqrt(Math.pow(vector.getX(), 2) + Math.pow(vector.getY(), 2));
-	// 	if (vectorLength < smallestDistance) {
-	// 	    smallestDistance = vectorLength;
-	// 	    closestEnemy = enemy;
-	// 	}
-	//     }
-	//     if (smallestDistance < tower.getRange())
-	// 	tower.fire(closestEnemy, delta);
-	// }
 
 	// Makes the tower fire at the enemy closest to the exit.
 	for (Tower tower : towers) {
@@ -102,15 +89,15 @@ public class MyGame extends BasicGame {
 	    }
 	}
 
+	// Loop through gameObjects, check for enemies to remove, and UPDATE ALL THE OBJECTS.
 	for (GameObject go : gameObjects) {
 	    if (go instanceof Enemy) {
 		Enemy enemy = (Enemy)go;
-		if (enemyExit.contains(enemy.getShape().getCenterX(), enemy.getShape().getCenterY())) {
-		    lives--;
-		    tagEnemyForRemoval(enemy); // Gotta do this because of concurrent modification shit.
-		}
+		if (enemyExit.contains(enemy.getShape().getCenterX(), enemy.getShape().getCenterY()))
+		    taggedEscapedEnemies.add(enemy); // Gotta do this because of concurrent modification shit.
+
 		if (enemy.getHp() <= 0)
-		    tagEnemyForRemoval(enemy); // Gotta do this because of concurrent modification shit.
+		    taggedKilledEnemies.add(enemy);
 	    }
 	    go.update(delta);
 	}
@@ -255,23 +242,25 @@ public class MyGame extends BasicGame {
 	Shape shape = new Rectangle(enemySpawn.getX() + enemySpawn.getWidth() / 4, enemySpawn.getY(), enemySpawn.getWidth()/ 2, enemySpawn.getHeight() / 2);
 	Color color = Color.red;
 	float velocity = 0.1f;
-	Enemy enemy = new Enemy(shape, color, velocity, shortestPaths, enemySpawn);
+	Enemy enemy = new Enemy(shape, color, velocity, shortestPaths, enemySpawn, enemyHp += 3);
 	gameObjects.add(enemy);
 	enemies.add(0, enemy);
     }
     
-    private void tagEnemyForRemoval(Enemy enemy) {
-	taggedEnemies.add(enemy);
-    }
-    
     private void removeTaggedEnemies() {
 	// TODO: Enemies that reach the exit should not warrant a reward.
-	for (Enemy enemy : taggedEnemies) {
+	for (Enemy enemy : taggedKilledEnemies) {
 	    gameObjects.remove(enemy);
 	    enemies.remove(enemy);
 	    money += enemy.getReward();
 	}
-	taggedEnemies = new ArrayList<Enemy>();
+	for (Enemy enemy : taggedEscapedEnemies) {
+	    gameObjects.remove(enemy);
+	    enemies.remove(enemy);
+	    lives--;
+	}
+	taggedKilledEnemies = new ArrayList<Enemy>();
+	taggedEscapedEnemies = new ArrayList<Enemy>();
     }
 
     public static void main(String[] args) throws SlickException {
